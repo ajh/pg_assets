@@ -19,7 +19,7 @@ module PGAssets
 
     # TODO get this to work with bomboclaat schemas
     def sql_for_remove
-      sql = "DROP FUNCTION IF EXISTS #{proname}(#{get_function_args})"
+      "DROP FUNCTION IF EXISTS #{proname}(#{get_function_args})"
     end
 
     def sql_for_reinstall

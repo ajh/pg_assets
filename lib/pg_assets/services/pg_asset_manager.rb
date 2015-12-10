@@ -78,6 +78,7 @@ module PGAssets
           assets << t.sql_for_reinstall + ';' + newline
         end
 
+        assets << PGConstraint.preamble
         constraints.each do |c|
           assets << newline
           assets << newline

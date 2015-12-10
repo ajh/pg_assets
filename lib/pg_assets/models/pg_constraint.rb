@@ -19,11 +19,36 @@ module PGAssets
     end
 
     def sql_for_remove
-      sql = "ALTER TABLE #{get_table_name} DROP CONSTRAINT IF EXISTS #{conname}"
+      "ALTER TABLE #{get_table_name} DROP CONSTRAINT IF EXISTS #{conname}"
     end
 
     def sql_for_reinstall
-      sql = "ALTER TABLE #{get_table_name} ADD CONSTRAINT #{conname} #{cached_defn}"
+      <<-REINSTALL
+SELECT create_constraint_if_not_exists(
+  '#{get_table_name}',
+  '#{conname}',
+  'ALTER TABLE #{get_table_name} ADD CONSTRAINT #{conname} #{cached_defn};')
+      REINSTALL
+    end
+
+    # From http://stackoverflow.com/questions/6801919/postgres-add-constraint-if-it-doesnt-already-exist
+    def self.preamble
+      <<-SQL
+create or replace function create_constraint_if_not_exists (
+    t_name text, c_name text, constraint_sql text
+)
+returns void AS
+$$
+begin
+    -- Look for our constraint
+    if not exists (select constraint_name
+                   from information_schema.constraint_column_usage
+                   where table_name = t_name  and constraint_name = c_name) then
+        execute constraint_sql;
+    end if;
+end;
+$$ language 'plpgsql';
+      SQL
     end
 
     private
