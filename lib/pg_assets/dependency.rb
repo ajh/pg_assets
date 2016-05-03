@@ -25,7 +25,7 @@ module PgAssets
 
       PgView.connection.select_all(query).map do |r|
         "#{r['schema']}.#{r['name']}"
-      end
+      end.sort
     end
 
     def tsort_each_child(node, &block)
@@ -33,7 +33,7 @@ module PgAssets
     end
 
     def tsort_each_node(&block)
-      (PgView.ours + PgTable.ours).map(&:identity).each(&block)
+      (PgView.ours + PgTable.ours).map(&:identity).sort.each(&block)
     end
   end
 end
